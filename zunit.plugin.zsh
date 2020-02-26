@@ -1,9 +1,11 @@
-builtin cd "${0:h}"
+builtin cd "${0:h}" \
+    > /dev/null 2>&1
 
 if [[ ! -f bin/zunit ]]; then
     # Clear the file to start with
     if [[ ! -d bin ]]; then
-        command mkdir bin
+        command mkdir bin \
+        > /dev/null 2>&1
     fi
     cat /dev/null > bin/zunit
 
@@ -31,4 +33,5 @@ fi
 path=("${0:h}/bin" $path)
 fpath=("${0:h}/src_comp" $fpath)
 
-builtin cd -
+builtin cd - \
+    > /dev/null 2>&1
