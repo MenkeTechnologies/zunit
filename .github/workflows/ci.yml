@@ -1,0 +1,55 @@
+name: CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y zsh curl git
+
+      - name: Fetch revolver dependency
+        run: |
+          set -euo pipefail
+          mkdir -p .bin
+          curl -fsSL -o .bin/revolver \
+            https://raw.githubusercontent.com/molovo/revolver/master/revolver
+          chmod u+x .bin/revolver
+          echo "$PWD/.bin" >> "$GITHUB_PATH"
+
+      - name: Build zunit binary from src/
+        run: |
+          set -euo pipefail
+          ./build.zsh
+          chmod u+x zunit
+          # Run self-tests using the freshly-built binary.
+          echo "$PWD" >> "$GITHUB_PATH"
+
+      - name: Set terminal env
+        run: |
+          echo "TERM=xterm" >> "$GITHUB_ENV"
+          echo "COLUMNS=120" >> "$GITHUB_ENV"
+          echo "LINES=40" >> "$GITHUB_ENV"
+
+      - name: Run zunit's own self-tests
+        run: |
+          set -euo pipefail
+          ./zunit --verbose tests
