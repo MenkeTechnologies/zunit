@@ -1,0 +1,32 @@
+#!/usr/bin/env zunit
+
+@test 'every .zunit test file declares the shebang line' {
+    # All zunit test files must declare `#!/usr/bin/env zunit` so the
+    # runner picks them up. A missing shebang silently drops the
+    # file from the suite without surfacing a parser error.
+    local missing=""
+    for f in $(find tests -maxdepth 1 -name "*.zunit" -type f 2>/dev/null); do
+        run head -1 "$f"
+        [[ "$output" == "#!/usr/bin/env zunit" ]] || missing="$missing ${f##*/}"
+    done
+    assert "$missing" is_empty
+}
+
+@test 'zunit.plugin.zsh entrypoint parses cleanly' {
+    run zsh -n zunit.plugin.zsh
+    assert $state equals 0
+}
+
+@test 'src/ and src_comp/ both exist (build dependency)' {
+    [[ -d src ]]
+    assert $state equals 0
+    [[ -d src_comp ]]
+    assert $state equals 0
+}
+
+@test 'README references the zunit binary or build output' {
+    # The build pipeline produces `bin/zunit`; the README must mention
+    # either the binary path or the `build.zsh` script that produces it.
+    run grep -E '(bin/zunit|build.zsh)' README.md
+    assert $state equals 0
+}
