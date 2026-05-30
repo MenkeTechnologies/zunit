@@ -1,6 +1,8 @@
 ![ZUnit](https://zunit.xyz/img/logo.png)
 
-[![GitHub release](https://img.shields.io/github/release/zunit-zsh/zunit.svg)](https://github.com/zunit-zsh/zunit/releases/latest) [![Build Status](https://travis-ci.org/zunit-zsh/zunit.svg?branch=master)](https://travis-ci.org/zunit-zsh/zunit) [![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/zunit-zsh/zunit?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+[![CI](https://github.com/MenkeTechnologies/zunit/actions/workflows/ci.yml/badge.svg)](https://github.com/MenkeTechnologies/zunit/actions/workflows/ci.yml)
+[![GitHub release](https://img.shields.io/github/release/MenkeTechnologies/zunit.svg)](https://github.com/MenkeTechnologies/zunit/releases/latest)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 ZUnit is a powerful unit testing framework for ZSH
 
@@ -31,7 +33,7 @@ brew install zunit-zsh/zunit/zunit
 ### Manual
 
 ```sh
-git clone https://github.com/zunit-zsh/zunit
+git clone https://github.com/MenkeTechnologies/zunit
 cd ./zunit
 ./build.zsh
 chmod u+x ./zunit
