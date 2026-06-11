@@ -1,0 +1,41 @@
+#!/usr/bin/env zunit
+
+# The `color` helper (src/helpers.zsh) builds raw ANSI escape sequences by
+# mapping a style word to a numeric attribute and a colour word/number to a
+# foreground code. These tests pin the exact byte sequence so a wrong
+# attribute code, a broken numeric-256 fallback branch, or a `$1`-instead-of
+# -`$@` regression that drops words is caught.
+
+@test 'color maps style shorthands to the correct ANSI attribute codes' {
+  # bold->1, italic->2, underline->4, inverse->7, strikethrough->9.
+  # A swapped/off-by-one entry in the style case table changes the leading
+  # attribute number, so assert the full sequence byte-for-byte.
+  assert "$(color red bold hi)"          same_as $'\033[1;31mhi\033[0;m'
+  assert "$(color red i hi)"             same_as $'\033[2;31mhi\033[0;m'
+  assert "$(color cyan underline x)"     same_as $'\033[4;36mx\033[0;m'
+  assert "$(color yellow in x)"          same_as $'\033[7;33mx\033[0;m'
+  assert "$(color magenta s x)"          same_as $'\033[9;35mx\033[0;m'
+
+  # No style word => attribute stays 0 and the second arg is the message,
+  # not consumed as a style.
+  assert "$(color blue x)"               same_as $'\033[0;34mx\033[0;m'
+}
+
+@test 'color routes a numeric colour through the 256-colour fallback branch' {
+  # The default branch evaluates $(( ${color} )) and emits 38;5;N. This is the
+  # only path using arithmetic expansion; a regression here (e.g. dropping the
+  # 38;5; prefix or mishandling the arithmetic) breaks 256-colour output.
+  assert "$(color 196 x)"                same_as $'\033[0;38;5;196mx\033[0;m'
+  assert "$(color 0 x)"                  same_as $'\033[0;38;5;0mx\033[0;m'
+
+  # With a style word in front, the attribute prefix is applied to the
+  # numeric colour too.
+  assert "$(color 196 bold x)"           same_as $'\033[1;38;5;196mx\033[0;m'
+}
+
+@test 'color preserves a multi-word message via $@ rather than dropping to $1' {
+  # If the implementation used $1 instead of ${@}, every word after the first
+  # would be lost. Spaces in the message must survive verbatim inside the
+  # escape sequence.
+  assert "$(color green 'hello world foo')" same_as $'\033[0;32mhello world foo\033[0;m'
+}
